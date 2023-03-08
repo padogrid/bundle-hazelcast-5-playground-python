@@ -5,19 +5,17 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>padogrid.addon</groupId>
-	<!-- @template: Enter your bundle name here -->
-	<artifactId>bundle-hazelcast-template</artifactId>
+	<artifactId>bundle-hazelcast-5-playground-python</artifactId>
 	<packaging>pom</packaging>
 	<name>${project.artifactId}</name>
 	<version>1.0.0</version>
-	<!-- @template: Enter your bundle description -->
-	<description>Bundle template</description>
+	<description>A playground for browsing and updating Hazelcast data structures</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
-		<hazelcast-addon.version>${project.version}</hazelcast-addon.version>
+		<bundle.version>${project.version}</bundle.version>
 		<skipTests>true</skipTests>
 	</properties>
 

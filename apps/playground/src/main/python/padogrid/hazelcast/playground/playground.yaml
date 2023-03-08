@@ -1,0 +1,59 @@
+# Configuration element's name is "serialization".
+# * "portable-factories":
+#     Lists your class implementations of Hazelcast's PortableFactory. Each factory has the required "factory-id"
+#     attribute that you should give as the ID of your factory. If "factory-id" is not defined then module.FACTORY_ID
+#     must be provided. Each class defined in the module must provide CLASS_ID.
+#
+serialization:
+    portable-factories:
+        - factory-id: 1
+          module-name: padogrid.hazelcast.playground.nw_portable
+
+#
+# Configuration element's name is "objects".
+# * "objects":
+#     Lists object creation functions for creating Portable or JSON objects. The functions that
+#     create JSON objects must return dictionary instances, which are internally wrapped in
+#     HazelcastJsonValue.
+#
+objects:
+    Customer: padogrid.hazelcast.playground.mock_data.create_customer
+    Order: padogrid.hazelcast.playground.mock_data.create_order
+    CustomerJson: padogrid.hazelcast.playground.mock_data_json.create_customer
+    OrderJson: padogrid.hazelcast.playground.mock_data_json.create_order
+
+#
+# er - Entity Relationships. Defines one-to-one or one-to-many relationships.
+#   from - takes one data structure name
+#   to - takes multiple data structure names
+#
+#   'object' is one of the objects defined under 'objects:'. If undefined, throws AttributeException.
+#   'attributes' lists one or more attributes. Each attribute must define the 'from' and 'to' object 
+#                attributes. The 'to' object attribute is set to `from` object attribute.
+#   'otm' stands for one-to-many and defines the max number of child objects. Must be >= 0. Default: 1
+#   'otm_type' must be 'random' or 'exact'. Default: 'exact'
+#
+er: 
+    # Customer_Order creates one Customer object with 0 to 5 Order objects.
+    # Order objects are stored in the data structure named 'orders_er'.
+    Customer_Order:
+        orders_er:
+            object: Order
+            attributes:
+                - attribute:
+                    from: __key
+                    to: customerId
+            otm: 5
+            otm-type: random
+
+    # Customer_Order_Json creates one Customer object with exactly 5 OrderJson objects.
+    # OrderJson objects are stored in the data structure named 'orders_er_json'.
+    Customer_Order_Json:
+        orders_er_json:
+            object: OrderJson
+            attributes:
+                - attribute:
+                    from: customerId
+                    to: customerId
+            otm: 5
+            otm-type: exact

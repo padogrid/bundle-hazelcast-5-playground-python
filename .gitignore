@@ -20,6 +20,9 @@ buildNumber.properties
 # vi
 *.swp
 
+# VS Code
+.vscode
+
 # PadoGrid workspace
 /.addonenv.sh
 /initenv.sh
@@ -32,7 +35,7 @@ workspace.code-workspace
 .ipynb_checkpoints
 
 # PadoGrid workspace directories
-apps
+#apps
 clusters
 docker
 groups
@@ -54,3 +57,6 @@ results
 *.sh0
 pom.xml0
 build
+apps/perf_test
+__pycache__
+apps/playground/test
