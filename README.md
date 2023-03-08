@@ -9,7 +9,7 @@ This bundle includes Hazelcast Playground, a web app for browsing and updating H
 ## Installing Bundle
 
 ```bash
-install_bundle -download bundle-hazelcast-playground-python
+install_bundle -download bundle-hazelcast-5-playground-python
 ```
 
 ## Use Case

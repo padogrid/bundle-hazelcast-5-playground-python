@@ -60,3 +60,4 @@ build
 apps/perf_test
 __pycache__
 apps/playground/test
+apps/playground/etc/playground.yaml
