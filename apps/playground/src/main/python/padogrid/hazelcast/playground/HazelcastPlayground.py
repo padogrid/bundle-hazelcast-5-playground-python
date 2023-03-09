@@ -463,5 +463,5 @@ desktop.main.append(card_terminal2)
 desktop.main.append(card_dac_overview)
 
 # Servable
-desktop.servable();
-#desktop.show();
+#desktop.servable();
+desktop.show();

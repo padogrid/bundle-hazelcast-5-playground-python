@@ -214,10 +214,7 @@ class DacSet(DacBase, Viewer):
         if len(ds_name) == 0:
             return
         if self.hazelcast_cluster != None:
-            ds = self.hazelcast_cluster.get_ds(self.ds_type, ds_name)
-        else:
-            ds = None
-        if ds != None:
+            ds = self.hazelcast_cluster.get_ds_from_hz(self.ds_type, ds_name)
             self.hazelcast_cluster.refresh()
             self._set_select.value = ds_name
 

@@ -95,6 +95,14 @@ class DacTopic(DacBase, Viewer):
         if len(ds_name_list) == 0:
             topic_list = ['']
             subscribe_list = [False]
+            # Remove all listeners
+            for name in self._listener_dict:
+                id = self._listener_dict[name]
+                if self.hazelcast_cluster != None:
+                    ds = self.hazelcast_cluster.get_ds(self.topic_type, name)
+                    if ds != None:
+                        ds.remove_listener(id)
+            self._listener_dict = {}
         else:
             topic_list = []
             subscribe_list = []
@@ -106,18 +114,24 @@ class DacTopic(DacBase, Viewer):
                     for index, row in old_df.iterrows():
                         old_name = row['Topic']
                         if old_name == name:
-                            subscribe_list.append(old_df.iloc[index]['Subscribe'])
+                            is_subscribed = old_df.iloc[index]['Subscribe']
+                            subscribe_list.append(is_subscribed)
                             break
                 else:
                     subscribe_list.append(False)
 
-        # Stop and remove existing threads that are not part of the new topic list.
+        # Stop and remove the existing threads that are not part of the new topic list.
         # This cleans up the existing thread events in case the topics are destroyed
         # by other clients.
         DacBase.thread_pool.refresh(self.topic_type, ds_name_list)
         for name in DacBase.thread_pool.get_ds_names(self.topic_type):
             if name in ds_name_list == False:
                 if name in self._listener_dict:
+                    if self.hazelcast_cluster != None:
+                        id = self._listener_dict[name]
+                        ds = self.hazelcast_cluster.get_ds(self.topic_type, name)
+                        if ds != None:
+                            ds.remove_listener(id)
                     del self._listener_dict[name]
 
         new_df = pd.DataFrame({
@@ -169,7 +183,7 @@ class DacTopic(DacBase, Viewer):
     def select(self, ds_name):
         self.__clear_status__()
         if self.hazelcast_cluster != None:
-            ds = self.hazelcast_cluster.get_ds(self.ds_type, ds_name)
+            ds = self.hazelcast_cluster.get_ds(self.topic_type, ds_name)
         else:
             ds = None
         self.execute_topic(ds)

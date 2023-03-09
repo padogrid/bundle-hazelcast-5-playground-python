@@ -256,7 +256,7 @@ class DacRingbuffer(DacBase, Viewer):
             count = self._add_input.value
             obj_type = self._add_select.value
             create_function = self.get_obj_creation_function(obj_type)
-            self.ingestor.ingest_ringbuffer(ds_name, create_function, count=count)
+            self.ingestor.ingest_ringbuffer(ds_name, create_function, None, count=count)
             self.hazelcast_cluster.refresh()
             self.__update_select__()
     
@@ -302,18 +302,23 @@ class DacRingbuffer(DacBase, Viewer):
             min_count = self._read_many_min_count_input.value
             max_count = self._read_many_max_count_input.value
             tail_sequence = HazelcastUtil.get_future_value(ds.tail_sequence())
+            is_error = False
             try:
                 if start_sequence > tail_sequence:
                     self._status_text.value = f'ERROR: read_many() - start_sequence > tail_sequence. Aborted.'
+                    is_error = True
                 else:
                     if min_count > tail_sequence - start_sequence + 1:
                         self._status_text.value = f'ERROR: read_many() - min_count > (tail_sequence-start_sequence+1). Aborted.'
+                        is_error = True
                     else:
                         future = ds.read_many(start_sequence, min_count, max_count)
                         self._data_list = HazelcastUtil.get_future_value(future)
             except Exception as ex:
+                is_error = True
                 self._status_text.value = f'ERROR: read_many() - {repr(ex)}'
-        self.execute_ringbuffer(ds)
+            if is_error == False:
+                self.execute_ringbuffer(ds)
         
     def execute_ringbuffer(self, ringbuffer):
         data = {}

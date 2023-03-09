@@ -108,41 +108,78 @@ class DacPNCounter(DacBase, Viewer):
             ds_name_list = []
         ds_name_list.sort()
 
-        old_name_list = self._pn_counter_select.options
-        if ds_name_list == old_name_list:
-            return
+        # Return if reset is False, i.e., skip refreshing blotter
+        if is_reset == False:
+            old_name_list = self._pn_counter_select.options
+            if ds_name_list == old_name_list:
+                return
 
         self._pn_counter_select.options = ds_name_list
         if ds_name == None and len(ds_name_list) > 0:
             ds_name = ds_name_list[0]
         self.select_pn_counter(ds_name)
+        self.__update_blotter__()
+    
+    def __update_blotter__(self, ds_name=None):
+        '''
+        Updates the blotter.
 
-        count_list = []
-        count_bar_list = []
-        if self.hazelcast_cluster != None:
+        Args:
+            ds_name: Data structure name. If None, then it creates a new data frame.
+        '''
+
+        ds_name_list = self._pn_counter_select.options
+        if len(ds_name_list) == 0 or ds_name == None:
+            if len(ds_name_list) == 0:
+                ds_name_list = ['']
+                count_list = [-1]
+                count_bar_list = [-1]
+                min_count = 0
+                max_count = 100
+            else:
+                count_list = []
+                count_bar_list = []
+                if self.hazelcast_cluster != None:
+                    for ds_name in ds_name_list:
+                        ds = self.hazelcast_cluster.get_ds(self.ds_type, ds_name)
+                        if ds != None:
+                            count = HazelcastUtil.get_future_value(ds.get())
+                        else:
+                            # This should never occur
+                            count = -1
+                        count_list.append(count)
+                        count_bar_list.append(count)
+                if len(count_list) > 0:
+                    min_count = min(count_list)
+                    max_count = max(count_list)
+            tabulator_formatters = {
+                'Bar': {'type': 'progress', 'min': min_count, 'max': max_count},
+            }
+            self._ds_table.formatters=tabulator_formatters
+            self._df = pd.DataFrame({
+                'Name': ds_name_list,
+                'Count': count_list,
+                'Bar' : count_bar_list
+            })
+            self._ds_table.value = self._df
+        else:
             ds = self.hazelcast_cluster.get_ds(self.ds_type, ds_name)
-        else:
-            ds = None
-        if ds != None:
-            count = HazelcastUtil.get_future_value(ds.get())
-            count_list.append(count)
-            count_bar_list.append(count)
-        if len(count_list) > 0:
-            min_count = min(count_list)
-            max_count = max(count_list)
-        else:
-            min_count = 0
-            max_count = 100
-        self._df = pd.DataFrame({
-            'Name': ds_name_list,
-            'Count': count_list,
-            'Bar' : count_bar_list
-        })
-        tabulator_formatters = {
-            'Bar': {'type': 'progress', 'min': min_count, 'max': max_count},
-        }
-        self._ds_table.value = self._df
-        self._ds_table.formatters=tabulator_formatters
+            if ds != None:
+                count = HazelcastUtil.get_future_value(ds.get())
+            else:
+                # This should never occur
+                count = -1
+            if 'Bar' in self._ds_table.formatters:
+                bar = self._ds_table.formatters['Bar']
+                cmin = bar['min']
+                cmax = bar['max']
+                if count < cmin:
+                    cmin = count
+                if count > cmax:
+                    cmax = count
+                bar['min'] = cmin
+                bar['max'] = cmax
+                self.__update_row__(ds_name, count)
         self._sync_widgets()
 
     def __panel__(self):
@@ -176,12 +213,15 @@ class DacPNCounter(DacBase, Viewer):
         self.__clear_status__()
         ds_name = self._pn_counter_select.value
         if ds_name == None:
+            self._get_text.value = ''
             return
         if self.hazelcast_cluster != None:
             ds = self.hazelcast_cluster.get_ds(self.ds_type, ds_name)
         else:
             ds = None
-        if ds != None:
+        if ds == None:
+            self._get_text.value = ''
+        else:
             count = HazelcastUtil.get_future_value(ds.get())
             self._get_text.value = str(count)
             self.__update_row__(ds_name, count)
@@ -197,6 +237,7 @@ class DacPNCounter(DacBase, Viewer):
             count = HazelcastUtil.get_future_value(ds.get_and_add(self._get_and_add_input.value))
             self._get_and_add_text.value = str(count)
             self.__get_execute__(None)
+            self.__update_blotter__(ds_name=ds_name)
 
     def __add_and_get_execute__(self, event):
         self.__clear_status__()
@@ -209,6 +250,7 @@ class DacPNCounter(DacBase, Viewer):
             count = HazelcastUtil.get_future_value(ds.add_and_get(self._add_and_get_input.value))
             self._add_and_get_text.value = str(count)
             self.__get_execute__(None)
+            self.__update_blotter__(ds_name=ds_name)
 
     def __get_and_subtract_execute__(self, event):
         self.__clear_status__()
@@ -221,6 +263,7 @@ class DacPNCounter(DacBase, Viewer):
             count = HazelcastUtil.get_future_value(ds.get_and_subtract(self._get_and_subtract_input.value))
             self._get_and_subtract_text.value = str(count)
             self.__get_execute__(None)
+            self.__update_blotter__(ds_name=ds_name)
 
     def __subtract_and_get_execute__(self, event):
         self.__clear_status__()
@@ -233,6 +276,7 @@ class DacPNCounter(DacBase, Viewer):
             count = HazelcastUtil.get_future_value(ds.subtract_and_get(self._subtract_and_get_input.value))
             self._subtract_and_get_text.value = str(count)
             self.__get_execute__(None)
+            self.__update_blotter__(ds_name=ds_name)
 
     def __reset_execute__(self, event):
         self.__clear_status__()
@@ -245,14 +289,15 @@ class DacPNCounter(DacBase, Viewer):
             count = ds.reset()
 
     def __new_execute__(self, event):
-        ds_name = self._new_text.value
+        ds_name = self._new_text.value.strip()
         ds_name = ds_name.strip()
         if len(ds_name) == 0:
             return
         if self.hazelcast_cluster != None and self.hazelcast_cluster.hazelcast_client != None:
-            ds_name = self.hazelcast_cluster.hazelcast_client.get_pn_counter(ds_name)
+            ds = self.hazelcast_cluster.get_ds_from_hz(self.ds_type, ds_name)
             self.hazelcast_cluster.refresh()
-            self._pn_counter_select.value = ds_name
+            self._pn_counter_select.options.append(ds_name)
+            self.select_pn_counter(ds_name)
 
     def __destroy_execute__(self, event):
         self.__clear_status__()
@@ -270,12 +315,12 @@ class DacPNCounter(DacBase, Viewer):
 
     def select_pn_counter(self, ds_name):
         self.__clear_status__()
-        if self.hazelcast_cluster != None:
-            ds = self.hazelcast_cluster.get_ds(self.ds_type, ds_name)
-        else:
-            ds = None
-        if ds == None:
-            return
+        # if self.hazelcast_cluster != None:
+        #     ds = self.hazelcast_cluster.get_ds(self.ds_type, ds_name)
+        # else:
+        #     ds = None
+        # if ds == None:
+        #     return
         self._pn_counter_select.value = ds_name
         self.__get_execute__(None)
         self._get_and_add_text.value = ''

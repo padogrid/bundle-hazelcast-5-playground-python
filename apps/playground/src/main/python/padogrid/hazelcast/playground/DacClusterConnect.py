@@ -96,7 +96,7 @@ class DacClusterConnect(DacBase, Viewer):
         self._status_text.value = state + " [" + self.cluster_url + "]"
         if state == "SHUTDOWN":
             if self.hazelcast_cluster != None:
-                self.hazelcast_cluster.refresh()
+                self.hazelcast_cluster.refresh(is_reset=True)
 
         # if state == "STARTED":
         #     self._status_text.background = 'yellow'
