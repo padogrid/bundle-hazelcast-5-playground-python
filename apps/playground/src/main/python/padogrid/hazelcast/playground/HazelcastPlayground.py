@@ -1,4 +1,5 @@
 # %%
+import os
 import datetime as dt
 import numpy as np
 import pandas as pd
@@ -462,6 +463,10 @@ desktop.main.append(card_terminal1)
 desktop.main.append(card_terminal2)
 desktop.main.append(card_dac_overview)
 
-# Servable
-#desktop.servable();
-desktop.show();
+# Use servable by default. Override it by setting the env variable
+# PLAYGROUND_SERVABLE anything but 'true', case insensitive.
+playground_servable = os.environ.get('PLAYGROUND_SERVABLE', 'true')
+if playground_servable.lower() == 'false':
+    desktop.show();
+else:
+    desktop.servable();
