@@ -37,7 +37,7 @@ apps
 2. Install the required Python packages
 
 ```bash
-pip install hazelcast-python-client panel pandas Faker
+pip install hazelcast-python-client panel pandas Faker cryptography 
 ```
 
 3. Create Hazelcast cluster

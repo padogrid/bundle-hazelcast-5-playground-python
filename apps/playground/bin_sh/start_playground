@@ -52,11 +52,48 @@ PORT="$PORT_ARG"
 if [ "$PORT" == "" ]; then
    PORT="5006"
 fi
+
+if [ "$SSL_CERTFILE" == "" ]; then
+   URL="http"
+else
+   URL="https"
+fi
+URL="${URL}://$IP_ADDRESS:$PORT/HazelcastPlayground"
 cat <<EOF
 Staring Hazelcast Playground on port $IP_ADDRESS:$PORT...
-- URL: http://$IP_ADDRESS:$PORT/HazelcastPlayground
+- URL: $URL
 EOF
+
 HAZELCAST_PLAYGROUND="$APP_DIR/src/main/python/padogrid/hazelcast/playground/HazelcastPlayground.py"
+
+OPTS="--port $PORT --allow-websocket-origin=$IP_ADDRESS:$PORT"
+
+if [ "$PLAYGROUND_OAUTH_ENABLED" == "true" ]; then
+   if [ "$OAUTH_PROVIDER" != "" ]; then
+      OPTS="$OPTS --oauth-provider $OAUTH_PROVIDER"
+   fi
+   if [ "$OAUTH_KEY" != "" ]; then
+      OPTS="$OPTS --oauth-key $OAUTH_KEY"
+   fi
+   if [ "$OAUTH_SECRET" != "" ]; then
+      OPTS="$OPTS --oauth-secret $OAUTH_SECRET"
+   fi
+   if [ "$COOKIE_SECRET" != "" ]; then
+      OPTS="$OPTS --cookie-secret=$COOKIE_SECRET"
+   fi
+   if [ "$OAUTH_EXPIRY" != "" ]; then
+      OPTS="$OPTS --oauth-expiry-days $OAUTH_EXPIRY"
+   fi
+   if [ "$OAUTH_ENCRYPTION" != "" ]; then
+      OPTS="$OPTS --oauth-encryption-key=$OAUTH_ENCRYPTION"
+   fi
+fi
+if [ "$SSL_CERTFILE" != "" ]; then
+   OPTS="$OPTS --ssl-certfile $SSL_CERTFILE"
+fi
+if [ "$SSL_KEYFILE" != "" ]; then
+   OPTS="$OPTS --ssl-keyfile $SSL_KEYFILE"
+fi
 pushd $APP_DIR > /dev/null
-panel serve --port $PORT --allow-websocket-origin=$IP_ADDRESS:$PORT $HAZELCAST_PLAYGROUND
+panel serve $HAZELCAST_PLAYGROUND $OPTS
 popd > /dev/null
