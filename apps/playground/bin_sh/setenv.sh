@@ -64,5 +64,5 @@ LOG_FILE=$APP_LOG_DIR/playground.log
 
 # Playground env variables used in Python
 # ---------------------------------------
-export PYTHONPATH="$APP_DIR/src/main/python"
 export PLAYGROUND_HOME="$APP_DIR"
+export PYTHONPATH="$PLAYGROUND_HOME/src/main/python"
