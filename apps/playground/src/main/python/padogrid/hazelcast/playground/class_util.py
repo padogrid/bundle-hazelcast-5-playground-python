@@ -23,6 +23,11 @@ def get_class_name(obj):
     c = obj.__class__.__mro__[0]
     return c.__module__ + "." + c.__name__
 
+def get_short_class_name(obj):
+    '''Returns the short class name.'''
+    c = obj.__class__.__mro__[0]
+    return c.__name__
+
 def get_class_introspect(method):
     '''Returns the class of the specified method.
     
@@ -102,7 +107,7 @@ def get_class_or_function(class_name):
         clazz = getattr(module, class_name)
         return clazz
     except (ImportError, AttributeError) as e:
-        raise ImportError(class_name)
+        raise e
 
 def get_instance(class_name):
     '''

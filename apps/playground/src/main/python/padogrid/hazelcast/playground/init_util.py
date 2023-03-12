@@ -5,6 +5,8 @@ from importlib import import_module
 from padogrid.hazelcast.playground.class_util import get_instance
 from padogrid.hazelcast.playground.class_util import get_class_or_function
 from padogrid.hazelcast.playground.class_util import get_classes_in_module
+from padogrid.hazelcast.playground.class_util import get_attributes
+from padogrid.hazelcast.playground.class_util import get_short_class_name
 
 def get_playground_config(file_path=None):
     '''Returns the playground configuration in a dictionary.
@@ -152,80 +154,39 @@ def get_er(playground_config, function_dict):
             object_dict[object] = er_list
     return object_dict
 
-def get_er_old(playground_config, function_dict):
-    object_dict = {}
-    if 'er' in playground_config:
-        er_dict = {}
-        er_dict['from'] = {}
-        er_dict['to'] = []
-        er = playground_config['er']
-        for object, value in er.items():
-            if 'from' in value:
-                from_dict = value['from']
-                for from_name, from_value in from_dict.items():
-                    if 'key' in from_value:
-                        key = from_value['key']
-                        if key != 'random' and key != 'uuid':
-                            key = 'random'
-                    else:
-                        key = 'random'
-                    if 'object' in from_value:
-                        from_object = from_value['object']
-                        if from_object in function_dict == False:
-                            raise AttributeError(f'Invalid configuration. Undefined object [{from_object}]: er.{object}.from.{from_name}.object.')
-                        from_function = function_dict[from_object]
-                    else:
-                        raise AttributeError(f'Invalid configuration. Undefined element: er.{object}.from.{from_name}.object')
+def get_components(playground_config, hazelcast_cluster):
+    component_list = []
+    if 'components' in playground_config:
+        components_list_config = playground_config['components']
+        for component_config in components_list_config:
+            try:
+                if 'component' in component_config:
+                    comp = component_config['component']
+                    component = {} 
+                    if 'class' in comp:
+                        class_name = comp['class']
+                        obj = get_instance(class_name)
+                        attr_dict =get_attributes(obj)
+                        # workaround: isinstance() throws exception due to a cyclic reference of DacBase
+                        if 'hazelcast_cluster' in attr_dict:
+                            obj.hazelcast_cluster = hazelcast_cluster
+                        component['component'] = obj
 
-                    from_dict2 = {}
-                    from_dict2['key'] = key
-                    from_dict2['object'] = from_object
-                    from_dict2['function'] = from_function
-                    er_dict['from'] = from_dict2
-
-            elif 'to' in value:
-                to_dict = value['to']
-                for to_name, to_value in to_dict.items():
-                    if 'key' in to_value:
-                        key = to_value['key']
-                        if key != 'random' and key != 'uuid':
-                            key = 'random'
-                    else:
-                        key = 'random'
-                    if 'object' in to_value:
-                        to_object = to_value['object']
-                        if to_object in function_dict == False:
-                            raise AttributeError(f'Invalid configuration. Undefined object [{to_object}]: er.{object}.from.{to_name}.object.')
-                        to_function = function_dict[to_object]
-                    else:
-                        raise AttributeError(f'Invalid configuration. Undefined element: er.{object}.from.{to_name}.object')
-                    if 'from-attr' in to_value:
-                        from_attr = to_value['from-attr'] 
-                    else:
-                        raise AttributeError(f'Invalid configuration. Undefined element: er.{object}.from.{to_name}.attr')
-                    if 'to-attr' in to_value:
-                        to_attr = to_value['to-attr'] 
-                    else:
-                        raise AttributeError(f'Invalid configuration. Undefined element: er.{object}.from.{to_name}.attr')
-                    if 'otm' in to_value:
-                        otm = to_value['otm'] 
-                    else:
-                        otm = 1
-                    if 'otm-type' in to_value:
-                        otm_type = to_value['otm-type'] 
-                        if otm_type != 'random' or otm_type != 'exact':
-                            otm_type = 'exact'
-                    else:
-                        otm_type = 'exact'
-
-                    to_dict2 = {}
-                    to_dict2['key'] = key
-                    to_dict2['object'] = to_object
-                    to_dict2['function'] = to_function
-                    to_dict2['from-attr'] = from_attr
-                    to_dict2['to-attr'] = to_attr
-                    to_dict2['otm'] = otm
-                    to_dict2['otm-type'] = otm_type
-                    er_dict['to'].append(from_dict)
-            object_dict[object] = er_dict
-    return object_dict
+                        if 'name' in comp:
+                            component['name'] = comp['name']
+                        else:
+                            component['name'] = get_short_class_name(obj)
+                        if 'title' in comp:
+                            component['title'] = comp['title']
+                        else:
+                            component['title'] = component['name']
+                        if 'tab' in comp:
+                            component['tab'] = comp['tab']
+                        else:
+                            component['tab'] = 'root'
+                    component_list.append(component)
+            except Exception as ex:
+                # Catch invalid class exception. Ignore for now.
+                print(ex)
+                pass
+    return component_list

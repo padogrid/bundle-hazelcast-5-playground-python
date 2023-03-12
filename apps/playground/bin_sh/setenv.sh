@@ -54,7 +54,9 @@ OAUTH_ENCRYPTION=""
 
 # SSL for https
 # -------------
+# SSL cerificate file path
 SSL_CERTFILE=""
+# SSL private key file path
 SSL_KEYFILE=""
       
 # Playground config
@@ -64,5 +66,9 @@ LOG_FILE=$APP_LOG_DIR/playground.log
 
 # Playground env variables used in Python
 # ---------------------------------------
+# Playground home path. Always top directory of the app
 export PLAYGROUND_HOME="$APP_DIR"
+# Plaground source path
 export PYTHONPATH="$PLAYGROUND_HOME/src/main/python"
+# Set PLAYGROUND_SERVABLE to "false" to invoke show(), "true" to invoke servable()
+export PLAYGROUND_SERVABLE="true"

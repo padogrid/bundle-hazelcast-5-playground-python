@@ -3,7 +3,6 @@
 DacBase is the base class for all Dac components.
 """
 
-from padogrid.hazelcast.playground.init_util import get_playground_config
 from padogrid.hazelcast.playground.init_util import get_create_functions
 from padogrid.hazelcast.playground.init_util import get_er
 from padogrid.hazelcast.playground.class_util import get_class_name
@@ -17,12 +16,17 @@ class DacBase():
     size_text_width = 100
     thread_pool = ThreadPool(size=10)
 
+    config = None
+    obj_creation_function_dict = None
+    er_dict = None
+    obj_type_list = None
+    er_name_list = None
+    component_list = None
 
-    config = get_playground_config()
-    obj_creation_function_dict = get_create_functions(config)
-    er_dict = get_er(config, obj_creation_function_dict)
-    obj_type_list = list(obj_creation_function_dict.keys())
-    er_name_list = list(er_dict.keys()) + ['N/A']
+    #obj_creation_function_dict = get_create_functions(playground_config)
+    #er_dict = get_er(playground_config, obj_creation_function_dict)
+    #obj_type_list = list(obj_creation_function_dict.keys())
+    #er_name_list = list(er_dict.keys()) + ['N/A']
 
     ingestor = DataIngestor(er_dict)
 

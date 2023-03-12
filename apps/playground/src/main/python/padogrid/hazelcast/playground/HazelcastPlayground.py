@@ -8,19 +8,37 @@ pn.extension('tabulator', css_files=[pn.io.resources.CSS_URLS['font-awesome']])
 pn.extension(sizing_mode="stretch_width")
 
 # %%
-import hazelcast
-from hazelcast.serialization.api import Portable
-
-from padogrid.hazelcast.playground.nw_portable import Customer
-from padogrid.hazelcast.playground.nw_portable import Order
-
+from padogrid.hazelcast.playground.DacBase import DacBase
 from padogrid.hazelcast.playground.HazelcastCluster import HazelcastCluster
-
+from padogrid.hazelcast.playground.init_util import get_playground_config
+from padogrid.hazelcast.playground.init_util import get_create_functions
+from padogrid.hazelcast.playground.init_util import get_er
+from padogrid.hazelcast.playground.init_util import get_components
 # %% [markdown]
 # ## DacClusterConnect
 
 # %%
 from padogrid.hazelcast.playground.DacClusterConnect import DacClusterConnect
+
+def initialize():
+    global playground_config
+    global cluster
+    global component_list
+
+    playground_config = get_playground_config()
+    cluster = HazelcastCluster()
+
+    obj_creation_function_dict = get_create_functions(playground_config)
+    er_dict = get_er(playground_config, obj_creation_function_dict)
+    obj_type_list = list(obj_creation_function_dict.keys())
+    er_name_list = list(er_dict.keys()) + ['N/A']
+    component_list = get_components(playground_config, cluster)
+    DacBase.config = playground_config
+    DacBase.obj_creation_function_dict = obj_creation_function_dict
+    DacBase.er_dict = er_dict
+    DacBase.obj_type_list = obj_type_list
+    DacBase.er_name_list = er_name_list
+    DacBase.component_list = component_list
 
 # Connect to cluster
 def connect_click(hazelcast_cluster):
@@ -28,11 +46,12 @@ def connect_click(hazelcast_cluster):
     cluster = hazelcast_cluster
     # desktop.open_modal()
     
-#dac_cluster_connect = DacClusterConnect(cluster_url='dev@localhost:5701', 
-#                                        portable_factories={Customer.FACTORY_ID: {Customer.CLASS_ID: Customer, Order.CLASS_ID: Order}})
-dac_cluster_connect = DacClusterConnect(cluster_url='dev@localhost:5701')
+# Initialize Dac component services including HazelcastCluster
+initialize()
+
+# Create ClusterConnect
+dac_cluster_connect = DacClusterConnect(hazelcast_cluster=cluster, cluster_url='dev@localhost:5701')
 dac_cluster_connect.on_click(connect_click)
-cluster = dac_cluster_connect.hazelcast_cluster
 client = cluster.hazelcast_client
 dac_cluster_connect
 
@@ -100,8 +119,8 @@ dac_ds_table
 
 # %%
 from padogrid.hazelcast.playground.DacHelp import DacHelp
-dac_overview = DacHelp(hazelcast_cluster = cluster)
-dac_overview
+dac_help = DacHelp(hazelcast_cluster = cluster)
+dac_help
 
 # %% [markdown]
 # ## DacFlakeIdGenerator
@@ -258,12 +277,12 @@ dac_topic
 # ## Playground
 
 # %%
-def create_dac_overview_card():
-    global card_dac_overview_title_text
-    global dac_overview
-    card_dac_overview_title_text = pn.widgets.StaticText(name='Help', value='')
-    card_dac_overview = pn.Card(dac_overview, name='Help', header=pn.panel(card_dac_overview_title_text))
-    return card_dac_overview
+def create_dac_help_card():
+    global card_dac_help_title_text
+    global dac_help
+    card_dac_help_title_text = pn.widgets.StaticText(name='Help', value='')
+    card_dac_help = pn.Card(dac_help, name='Help', header=pn.panel(card_dac_help_title_text))
+    return card_dac_help
 
 def create_dac_flake_id_generator_card():
     global card_dac_flake_id_generator_title_text
@@ -391,7 +410,7 @@ desktop.sidebar.append(pn.Column(sidebar_tabs))
 desktop.sidebar.sidebar_width = 600
 
 # Main
-card_dac_overview = create_dac_overview_card()
+card_dac_help = create_dac_help_card()
 card_dac_flake_id_generator = create_dac_flake_id_generator_card()
 card_dac_ingestor = create_dac_ingestor_card()
 card_dac_ingestor_progress = create_dac_ingestor_progress_card()
@@ -446,22 +465,15 @@ desktop.main.append(
 )
 desktop.main.append(card_dac_ingestor_progress)
 
-from padogrid.hazelcast.playground.DacTerminal import DacTerminal
+# Additional components defined in playground.yaml
+for component in component_list:
+    if component['tab'] == 'root':
+        dac = component['component']
+        card = pn.Card(dac, name=component['name'], title=component['title'])
+        desktop.main.append(card)
 
-# Additional query widgets
-query1 = DacMapQuery(hazelcast_cluster=cluster)
-card_query1 = pn.Card(query1, name='Query1', title='Query1')
-query2 = DacMapQuery(hazelcast_cluster=cluster)
-card_query2 = pn.Card(query2, name='Query2', title='Query2')
-terminal1 = DacTerminal(hazelcast_cluster=cluster, name='PadoGrid1')
-card_terminal1 = pn.Card(terminal1, name='PadoGrid1', title='PadoGrid1')
-terminal2 = DacTerminal(hazelcast_cluster=cluster, name='PadoGrid2')
-card_terminal2 = pn.Card(terminal2, name='PadoGrid2', title='PadoGrid2')
-desktop.main.append(card_query1)
-desktop.main.append(card_query2)
-desktop.main.append(card_terminal1)
-desktop.main.append(card_terminal2)
-desktop.main.append(card_dac_overview)
+# Help component
+desktop.main.append(card_dac_help)
 
 # Use servable by default. Override it by setting the env variable
 # PLAYGROUND_SERVABLE anything but 'true', case insensitive.

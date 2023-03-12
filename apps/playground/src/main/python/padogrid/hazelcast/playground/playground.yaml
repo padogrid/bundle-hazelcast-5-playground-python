@@ -23,15 +23,17 @@ objects:
     OrderJson: padogrid.hazelcast.playground.mock_data_json.create_order
 
 #
-# er - Entity Relationships. Defines one-to-one or one-to-many relationships.
+# Configuration element's name is "er".
+# * "er":
+#   Entity Relationships. Defines one-to-one or one-to-many relationships.
 #   from - takes one data structure name
 #   to - takes multiple data structure names
 #
-#   'object' is one of the objects defined under 'objects:'. If undefined, throws AttributeException.
-#   'attributes' lists one or more attributes. Each attribute must define the 'from' and 'to' object 
+#   "object" is one of the objects defined under 'objects:'. If undefined, throws AttributeException.
+#   "attributes" lists one or more attributes. Each attribute must define the 'from' and 'to' object 
 #                attributes. The 'to' object attribute is set to `from` object attribute.
-#   'otm' stands for one-to-many and defines the max number of child objects. Must be >= 0. Default: 1
-#   'otm_type' must be 'random' or 'exact'. Default: 'exact'
+#   "otm" stands for one-to-many and defines the max number of child objects. Must be >= 0. Default: 1
+#   "otm_type" must be 'random' or 'exact'. Default: 'exact'
 #
 er: 
     # Customer_Order creates one Customer object with 0 to 5 Order objects.
@@ -57,3 +59,45 @@ er:
                     to: customerId
             otm: 5
             otm-type: exact
+
+#
+# Configuration element's name is "components".
+# * "components":
+#   A list of component elements defining additional Panel compliant components
+#   to be added in Playground. It has the following attributes.
+#  
+# * "component":
+#   Defined a component. It has the following attributes.
+#
+# * "name":
+#   Name of the component. If not specified, then it default to the component's class name.
+# * "title":
+#   Title to of the component displayed in Playground. If not specified then it defaults to name.
+# * "class":
+#   Fully-qualified class name of the component. This class must be compliant with the Panel
+#   customer widget requirements.
+#   
+# * "tab":
+#   Tab type. Currently supports 'root' only. Places the component in a root tab in the main pane.
+#
+components:
+    - component:
+        name: Query1
+        title: Query1
+        class: padogrid.hazelcast.playground.DacMapQuery.DacMapQuery
+        tab: root
+    - component:
+        name: Query2
+        title: Query2
+        class: padogrid.hazelcast.playground.DacMapQuery.DacMapQuery
+        tab: root
+    - component:
+        name: PadoGrid1
+        title: PadoGrid1
+        class: padogrid.hazelcast.playground.DacTerminal.DacTerminal
+        tab: root
+    - component:
+        name: PadoGrid2
+        title: PadoGrid2
+        class: padogrid.hazelcast.playground.DacTerminal.DacTerminal
+        tab: root
