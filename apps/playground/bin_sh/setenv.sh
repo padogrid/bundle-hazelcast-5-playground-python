@@ -61,7 +61,9 @@ SSL_KEYFILE=""
       
 # Playground config
 # -----------------
+# Playground configuration file path
 CONFIG_FILE=$APP_ETC_DIR/playground.yaml
+# Playground log file path
 LOG_FILE=$APP_LOG_DIR/playground.log
 
 # Playground env variables used in Python
