@@ -180,10 +180,18 @@ def get_components(playground_config, hazelcast_cluster):
                             component['title'] = comp['title']
                         else:
                             component['title'] = component['name']
-                        if 'tab' in comp:
-                            component['tab'] = comp['tab']
+                        if 'panel' in comp:
+                            panel = comp['panel']
+                            if panel == 'main' and panel == 'sidebar':
+                                component['panel'] = panel
+                            else:
+                                component['panel'] = 'main'
                         else:
-                            component['tab'] = 'root'
+                            component['panel'] = 'main'
+                        if 'root' in comp:
+                            component['root'] = comp['root']
+                        else:
+                            component['root'] = None
                     component_list.append(component)
             except Exception as ex:
                 # Catch invalid class exception. Ignore for now.

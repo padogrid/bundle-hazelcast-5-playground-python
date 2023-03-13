@@ -466,12 +466,42 @@ desktop.main.append(
 desktop.main.append(card_dac_ingestor_progress)
 
 # Additional components defined in playground.yaml
+sidebar_root_dict = {}
+main_root_dict = {}
 for component in component_list:
-    if component['tab'] == 'root':
-        dac = component['component']
-        card = pn.Card(dac, name=component['name'], title=component['title'])
-        desktop.main.append(card)
+    dac = component['component']
+    card = pn.Card(dac, name=component['name'], title=component['title'])
+    if component['panel'] == 'main':
+        desktop_pane = desktop.main 
+        root_dict = main_root_dict
+    else:
+        desktop_pane = desktop.sidebar 
+        root_dict = sidebar_root_dict
+    root = component['root']
+    if root == None:
+        desktop_pane.append(card)
+    else:
+        if root in root_dict:
+            main_cards = root_dict[root]
+        else:
+            main_cards = []
+            root_dict[root] = main_cards
+        main_cards.append(card)
 
+for name, cards in main_root_dict.items():
+    main_tabs = pn.Tabs(name=name,
+                    dynamic=True)
+    for card in cards:
+        main_tabs.append(card)
+    desktop.main.append(main_tabs)
+
+for name, cards in sidebar_root_dict.items():
+    main_tabs = pn.Tabs(name=name,
+                    dynamic=True)
+    for card in cards:
+        main_tabs.append(card)
+    desktop.sidebar.append(main_tabs)
+ 
 # Help component
 desktop.main.append(card_dac_help)
 

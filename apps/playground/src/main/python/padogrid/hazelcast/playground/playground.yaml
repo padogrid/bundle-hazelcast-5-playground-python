@@ -1,3 +1,6 @@
+import:
+    - etc/my-playground.yaml
+
 # Configuration element's name is "serialization".
 # * "portable-factories":
 #     Lists your class implementations of Hazelcast's PortableFactory. Each factory has the required "factory-id"
@@ -76,28 +79,38 @@ er:
 # * "class":
 #   Fully-qualified class name of the component. This class must be compliant with the Panel
 #   customer widget requirements.
-#   
-# * "tab":
-#   Tab type. Currently supports 'root' only. Places the component in a root tab in the main pane.
+# * "panel":
+#   Panel template pane. Valid values are 'main' and 'sidebar'. If not specified or an invalid
+#   then it defaults to 'main'. If 'main', then the component is displayed in the main area.
+#   If 'sidebar', then the component is displayed in the sidebar area.
+# * "root":
+#   The root pane name. If unspecified, then the component is displayed in the top pane
+#   without tabs. If specified, then it places the component in a tab named with this
+#   value in the template pane defined by the "panel" attribute. By using the same "root"
+#   name, multiple components can be placed in the same root pane.
 #
 components:
     - component:
         name: Query1
         title: Query1
         class: padogrid.hazelcast.playground.DacMapQuery.DacMapQuery
-        tab: root
+        panel: main
+        root: Query1
     - component:
         name: Query2
         title: Query2
         class: padogrid.hazelcast.playground.DacMapQuery.DacMapQuery
-        tab: root
+        panel: main
+        root: Query2
     - component:
         name: PadoGrid1
         title: PadoGrid1
         class: padogrid.hazelcast.playground.DacTerminal.DacTerminal
-        tab: root
+        panel: main
+        root: PadoGrid1
     - component:
         name: PadoGrid2
         title: PadoGrid2
         class: padogrid.hazelcast.playground.DacTerminal.DacTerminal
-        tab: root
+        panel: main
+        root: PadoGrid2
