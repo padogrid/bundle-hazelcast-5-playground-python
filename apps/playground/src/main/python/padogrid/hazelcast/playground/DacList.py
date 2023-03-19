@@ -73,17 +73,16 @@ class DacList(DacBase, Viewer):
         self._sync_widgets()
 
     def clear(self):
-        data = {}
-        self._blotter.page = 1
-        df = pd.DataFrame(data)
-        self._blotter.value = df
-        self._json_editor.value = {}
-        self._index_input.start = -1
-        self._index_input.end = -1
         # It takes some time to clear the map. Assume the queue properly clears.
         if self.hazelcast_cluster != None:
             self.hazelcast_cluster.refresh()
-        # self.__refresh_size__()
+            data = {}
+            self._blotter.page = 1
+            df = pd.DataFrame(data)
+            self._blotter.value = df
+            self._json_editor.value = {}
+            self._index_input.start = -1
+            self._index_input.end = -1
         
     def __panel__(self):
         return self._layout
@@ -130,13 +129,12 @@ class DacList(DacBase, Viewer):
 
     def __clear_button_on_click__(self, event):
         ds_name = self._list_select.value
-        if self.hazelcast_cluster != None:
-            ds = self.hazelcast_cluster.get_ds(self.ds_type, ds_name)
-        else:
-            ds = None
-        if ds != None:
-            ds.clear()
-        self.clear()
+        if ds_name != None and ds_name != '':
+            if self.hazelcast_cluster != None:
+                ds = self.hazelcast_cluster.get_ds(self.ds_type, ds_name)
+                if ds != None:
+                    ds.clear()
+                self.clear()
 
     def __refresh_size__(self):
         try:

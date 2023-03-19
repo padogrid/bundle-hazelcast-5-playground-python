@@ -45,20 +45,22 @@ class DacMultiMap(DacBase, Viewer):
         self._sync_widgets()
 
     def clear(self):
-        data = {}
-        self._map_blotter.page = 1
-        df = pd.DataFrame(data)
-        self._map_blotter.value = df
         # It takes some time to clear the map. Assume the map properly clears.
         if self.hazelcast_cluster != None:
             self.hazelcast_cluster.refresh()
-        # self.__refresh_size__()
+            data = {}
+            self._map_blotter.page = 1
+            df = pd.DataFrame(data)
+            self._map_blotter.value = df
 
     def refresh(self, is_reset=False):
         '''Refreshes this component with the latest data from Hazelcast.
         '''
         if self.hazelcast_cluster != None:
             ds_name_list = self.hazelcast_cluster.get_ds_names(self.ds_type)
+        else:
+            ds_name_list = []
+        ds_name_list.sort()
 
         # Return if reset is False, i.e., skip execute map
         if is_reset == False:
@@ -97,11 +99,12 @@ class DacMultiMap(DacBase, Viewer):
 
     def __clear_button_on_click__(self, event):
         ds_name = self._map_select.value
-        if self.hazelcast_cluster != None:
-            map = self.hazelcast_cluster.get_ds(self.ds_type, ds_name)
-            if map != None:
-                map.clear()
-        self.clear()
+        if ds_name != None and ds_name != '':
+            if self.hazelcast_cluster != None:
+                map = self.hazelcast_cluster.get_ds(self.ds_type, ds_name)
+                if map != None:
+                    map.clear()
+                self.clear()
 
     def __refresh_size__(self):
         ds_name = self._map_select.value

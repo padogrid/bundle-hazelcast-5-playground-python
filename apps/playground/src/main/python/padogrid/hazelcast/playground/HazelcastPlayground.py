@@ -349,8 +349,8 @@ def create_dac_replicated_map_card():
     global card_replicated_map_title_text
     global dac_replicated_map
     card_replicated_map_title_text = pn.widgets.StaticText(name='ReplicatedMap', value='ReplicatedMap')
-    card_dac_replciated_map = pn.Card(dac_replicated_map, name='ReplicatedMap', header=pn.panel(card_replicated_map_title_text))
-    return card_dac_replciated_map
+    card_dac_replicated_map = pn.Card(dac_replicated_map, name='ReplicatedMap', header=pn.panel(card_replicated_map_title_text))
+    return card_dac_replicated_map
 
 def create_dac_replicated_map_key_search_card():
     global replicated_dac_map_key_search
@@ -489,18 +489,18 @@ for component in component_list:
         main_cards.append(card)
 
 for name, cards in main_root_dict.items():
-    main_tabs = pn.Tabs(name=name,
+    new_tabs = pn.Tabs(name=name,
                     dynamic=True)
     for card in cards:
-        main_tabs.append(card)
-    desktop.main.append(main_tabs)
+        new_tabs.append(card)
+    desktop.main.append(new_tabs)
 
 for name, cards in sidebar_root_dict.items():
-    main_tabs = pn.Tabs(name=name,
+    new_tabs = pn.Tabs(name=name,
                     dynamic=True)
     for card in cards:
-        main_tabs.append(card)
-    desktop.sidebar.append(main_tabs)
+        new_tabs.append(card)
+    desktop.sidebar.append(new_tabs)
  
 # Help component
 desktop.main.append(card_dac_help)

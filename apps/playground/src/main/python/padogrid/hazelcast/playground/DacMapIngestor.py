@@ -224,6 +224,9 @@ class DacMapIngestor(DacBase, Viewer):
                 break
         # Update df if a new name
         if found == False:
+            if self.hazelcast_cluster != None and self.hazelcast_cluster.hazelcast_client != None:
+                map = self.get_map_from_hz(name)
+
             name_list = self._df['Name'].to_list()
             # Replace the place holder (empty) row  used as a workaround to a Panel bug
             is_place_holder = len(name_list) == 1 and name_list[0] == ''
@@ -280,13 +283,11 @@ class DacMapIngestor(DacBase, Viewer):
             self._df = new_df
             self._blotter.value = new_df
 
-        if self.hazelcast_cluster != None and self.hazelcast_cluster.hazelcast_client != None:
-            map = self.get_map_from_hz(name)
-            # Select the new row
-            for index, row in self._df.iterrows():
-                if name == row['Name']:
-                    self._blotter.selection = [index]
-                    break
+        # Select the new row
+        for index, row in self._df.iterrows():
+            if name == row['Name']:
+                self._blotter.selection = [index]
+                break
 
     def __click_remove_button__(self, event):
         return

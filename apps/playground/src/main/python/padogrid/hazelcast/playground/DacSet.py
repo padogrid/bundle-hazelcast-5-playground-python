@@ -38,19 +38,23 @@ class DacSet(DacBase, Viewer):
         self._set_select.param.watch(self.__set_select_value_changed__, 'value')
         self._ds_size_text = pn.widgets.TextInput(name='Size', disabled=True, width=self.size_text_width)
 
+        self._get_all_button = pn.widgets.Button(name='get_all()', button_type='primary', width=self.button_width)
+        self._get_all_button.on_click(self.__get_all_execute__)
+
+        self._clear_button = pn.widgets.Button(name='clear()', button_type='primary', width=self.button_width)
+        self._clear_button.on_click(self.__clear_button_on_click__)
+
         self._destroy_button = pn.widgets.Button(name='destroy()', button_type='primary', width=self.button_width)
         self._destroy_button.on_click(self.__destroy_execute__)
 
         self._add_button = pn.widgets.Button(name='add()', button_type='primary', width=self.button_width)    
         self._add_button.on_click(self.__add_execute__)
-        self._add_select = pn.widgets.Select(name='Object', options=self.obj_type_list, width=160)
+        self._add_select = pn.widgets.Select(name='Object', options=self.obj_type_list, width=170)
         self._add_input = pn.widgets.IntInput(name='Count', value=1, step=1, start=1, width=int_input_width)
 
         self._remove_button = pn.widgets.Button(name='remove()', button_type='primary', width=self.button_width)
         self._remove_button.on_click(self.__remove_execute__)
 
-        self._clear_button = pn.widgets.Button(name='clear()', button_type='primary', width=self.button_width)
-        self._clear_button.on_click(self.__clear_button_on_click__)
 
         self._new_button = pn.widgets.Button(name='New', button_type='primary', width=self.button_width)
         self._new_button.on_click(self.__new_execute__)
@@ -73,9 +77,9 @@ class DacSet(DacBase, Viewer):
         self._layout = pn.Column(self._status_text,
                                  pn.Row(self._new_button, self._new_text),
                                  pn.Row(self._set_select, self._ds_size_text),
-                                 pn.Row(self._destroy_button),
+                                 pn.Row(self._get_all_button, self._clear_button, self._destroy_button),
                                  pn.Row(self._add_button, self._add_select, self._add_input),
-                                 pn.Row(self._remove_button, self._clear_button),
+                                 pn.Row(self._remove_button),
                                  self._ds_table, self._json_editor)
         self._sync_widgets()
 
@@ -101,15 +105,14 @@ class DacSet(DacBase, Viewer):
         self._sync_widgets()
 
     def clear(self):
-        data = {}
-        self._ds_table.page = 1
-        df = pd.DataFrame(data)
-        self._ds_table.value = df
-        self._json_editor.value = {}
         # It takes some time to clear the map. Assume the queue properly clears.
         if self.hazelcast_cluster != None:
             self.hazelcast_cluster.refresh()
-        # self.__refresh_size__()
+            data = {}
+            self._ds_table.page = 1
+            df = pd.DataFrame(data)
+            self._ds_table.value = df
+            self._json_editor.value = {}
         
     def __panel__(self):
         return self._layout
@@ -187,13 +190,12 @@ class DacSet(DacBase, Viewer):
     def __clear_button_on_click__(self, event):
         self.__clear_status__()
         ds_name = self._set_select.value
-        if self.hazelcast_cluster != None:
-            ds = self.hazelcast_cluster.get_ds(self.ds_type, ds_name)
-        else:
-            ds = None
-        if ds != None:
-            ds.clear()
-        self.clear()
+        if ds_name != None and ds_name != '':
+            if self.hazelcast_cluster != None:
+                ds = self.hazelcast_cluster.get_ds(self.ds_type, ds_name)
+                if ds != None:
+                    ds.clear()
+                self.clear()
 
     def __refresh_size__(self):
         ds_name = self._set_select.value
@@ -217,6 +219,11 @@ class DacSet(DacBase, Viewer):
             ds = self.hazelcast_cluster.get_ds_from_hz(self.ds_type, ds_name)
             self.hazelcast_cluster.refresh()
             self._set_select.value = ds_name
+
+    def __get_all_execute__(self, event):
+        ds_name = self._set_select.value
+        if ds_name != None:
+            self.select(ds_name)
 
     def __destroy_execute__(self, event):
         self.__clear_status__()

@@ -54,15 +54,14 @@ class DacQueue(DacBase, Viewer):
         self._sync_widgets()
 
     def clear(self):
-        data = {}
-        self._blotter.page = 1
-        df = pd.DataFrame(data)
-        self._blotter.value = df
-        self._json_editor.value = {}
         # It takes some time to clear the map. Assume the queue properly clears.
         if self.hazelcast_cluster != None:
             self.hazelcast_cluster.refresh()
-        # self.__refresh_size__()
+            data = {}
+            self._blotter.page = 1
+            df = pd.DataFrame(data)
+            self._blotter.value = df
+            self._json_editor.value = {}
         
     def refresh(self, is_reset=False):
         ds_name = self._queue_select.value
@@ -126,11 +125,12 @@ class DacQueue(DacBase, Viewer):
 
     def __clear_button_on_click__(self, event):
         ds_name = self._queue_select.value
-        if self.hazelcast_cluster != None:
-            queue = self.hazelcast_cluster.get_ds(self.ds_type, ds_name)
-            if queue != None:
-                queue.clear()
-        self.clear()
+        if ds_name != None and ds_name != '': 
+            if self.hazelcast_cluster != None:
+                queue = self.hazelcast_cluster.get_ds(self.ds_type, ds_name)
+                if queue != None:
+                    queue.clear()
+                self.clear()
 
     def __refresh_size__(self):
         ds_name = self._queue_select.value
