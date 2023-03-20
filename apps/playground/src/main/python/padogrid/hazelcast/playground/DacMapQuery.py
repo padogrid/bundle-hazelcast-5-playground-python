@@ -68,7 +68,7 @@ class DacMapQuery(DacBase, Viewer):
         self._on_click_callback = callback
         
     def refresh(self, is_reset=False):
-        # Noththing to do
+        # Nothing to do
         return
         
     def execute_query(self, query):

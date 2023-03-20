@@ -12,6 +12,7 @@ customerId_prefix = "c"
 orderId_prefix = "c"
 default_key_type = 'random'
 default_key_range = 100_000_000
+day_in_msec = 24*60*60*1000
 
 def create_customer_json(key=None, er_key=None, key_type=default_key_type, key_range=default_key_range):
     customer, key = create_customer(key=key, er_key=er_key, key_range=key_range)
@@ -27,9 +28,10 @@ def create_customer(key=None, er_key=None, key_type=default_key_type, key_range=
             num = random.randint(0, key_range-1)
             #num = fake_customer.unique.random_int()
             key = customerId_prefix + str(num).zfill(8)
+    current_time_in_msec = time.time() * 1000
     customer = {
-        "createdOn": time.localtime(),
-        "updatedOn": time.localtime(),
+        "createdOn": current_time_in_msec,
+        "updatedOn": current_time_in_msec,
         "address": fake.street_address(),
         "city": fake.city(), 
         "companyName" : fake.company(),
@@ -64,15 +66,16 @@ def create_order(key=None, er_key=None, key_type=default_key_type, key_range=def
         er_key = customerId_prefix + er_key.zfill(8)
     freight=round(random.random() * 100, 2)
     shipVia = str (int (random.random() * 7))
+    current_time_in_msec = time.time() * 1000
     order = {
-        "createdOn": time.localtime(),
-        "updatedOn": time.localtime(),
+        "createdOn": current_time_in_msec,
+        "updatedOn": current_time_in_msec,
         "customerId": key,
         "employeeId": fake.ssn(),
         "freight": freight,
-        "orderDate": time.localtime(),
+        "orderDate": current_time_in_msec,
         "orderId": er_key,
-        "requiredDate": time.localtime(),
+        "requiredDate": current_time_in_msec + day_in_msec*5,
         "shipAddress": fake.street_address(),
         "shipCity": fake.city(),
         "shipCountry": fake.country(),
@@ -80,6 +83,6 @@ def create_order(key=None, er_key=None, key_type=default_key_type, key_range=def
         "shipPostalCode": fake.postcode(),
         "shipRegion": fake.state(),
         "shipVia": shipVia,
-        "shippedDate": time.localtime()
+        "shippedDate": current_time_in_msec + day_in_msec,
     }
     return order, key

@@ -190,9 +190,105 @@ OPTIONS ('keyFormat'='java',
          'valuePortableClassVersion'='0')
 ```
 
-### JSON Mapping
+### JSON
 
-**Customer**
+
+#### JSON Mapping
+
+- `json-flat` - Treats JSON documents as flat objects providing columns that can be accessed in SQL statements.
+- `json` - Treats JSON documents as JSON objects requiring JSON_QUERY.
+
+#### JSON Query
+
+##### `JSON_QUERY`
+
+The `JSON_QUERY()` function extracts a JSON value from a JSON document or a JSON-formatted string that matches a given JsonPath expression.
+
+Syntax:
+
+```sql
+JSON_QUERY(jsonArg:{VARCHAR | JSON}, jsonPath:VARCHAR [<wrapperBehavior>] [<onClauseArg> ON ERROR] [<onClauseArg> ON EMPTY])` :: JSON
+```
+
+##### `JSON_VALUE`
+
+The `JSON_VALUE()` function extracts a primitive value, such as a string, number, or boolean that matches a given JsonPath expression. This function returns NULL if a non-primitive value is matched, unless the ON ERROR behavior is changed.
+
+Syntax: 
+
+```sql
+JSON_VALUE(jsonArg:{VARCHAR | JSON}, jsonPath:VARCHAR [RETURNING dataType] [<onClauseArg> ON ERROR] [<onClauseArg> ON EMPTY])` :: VARCHAR
+```
+
+##### `JSON_OBJECT`
+
+The `JSON_OBJECT()` function returns a JSON object from the given key/value pairs.
+
+Syntax:
+
+```sql
+JSON_OBJECT([key : value] [, ...] [{ABSENT|NULL} ON NULL]) :: JSON
+```
+
+#### `JSON_ARRAYAGG`
+
+The `JSON_ARRAYAGG()` returns a JSON array containing an element for each value in a given set of SQL values. It takes as its input a column of SQL expressions, converts each expression to a JSON value, and returns a single JSON array that contains those JSON values.
+
+Syntax:
+
+```sql
+JSON_ARRAY(value [ORDER BY value {ASC|DESC}] [{ABSENT|NULL} ON NULL]) :: JSON
+```
+
+#### `JSON_OBJECTAGG`
+
+The JSON_OBJECTAGG() function constructs an object member for each key-value pair and returns a single JSON object that contains those object members. It takes as its input a property key-value pair. Typically, the property key, the property value, or both are columns of SQL expressions.
+
+Syntax:
+
+```sql
+JSON_OBJECTAGG([key : value] [, ...] [{ABSENT|NULL} ON NULL]) :: JSON
+```
+
+Or
+
+```sql
+JSON_OBJECTAGG([[KEY] key VALUE value] [{ABSENT|NULL} ON NULL]) :: JSON
+```
+
+### JSON SQL Examples
+
+#### Customer
+
+##### `json-flat`
+
+```sql
+CREATE OR REPLACE MAPPING customers_json (
+    __key VARCHAR,
+    createdOn BIGINT,
+    updatedOn BIGINT,
+    address VARCHAR,
+    city VARCHAR,
+    companyName VARCHAR,
+    contactName VARCHAR,
+    contactTitle VARCHAR,
+    country VARCHAR,
+    customerId VARCHAR,
+    fax VARCHAR,
+    phone VARCHAR,
+    postalCode VARCHAR,
+    region VARCHAR)
+type IMap OPTIONS('keyFormat'='varchar', 'valueFormat'='json-flat');
+```
+
+Examples:
+
+```sql
+--- Returns all customers residing in Turkey
+select contactName, companyName, country from customers_json where country='Turkey'
+```
+
+##### `json`
 
 ```sql
 CREATE OR REPLACE MAPPING customers_json
@@ -203,7 +299,71 @@ OPTIONS (
 )
 ```
 
-**Order**
+Examples:
+
+```sql
+--- Returns customer JSON documents starting from the JSON root level, i.e., '$'.
+SELECT JSON_QUERY(this, '$')  from customers_json;
+```
+
+```sql
+--- Returns customerId and country at the top level of JSON documents.
+SELECT JSON_QUERY(this, '$.customerId' WITH WRAPPER) AS customerId, JSON_QUERY(this, '$.country' WITH WRAPPER) AS country
+from customers_json
+```
+
+```sql
+--- Returns contactName, companyName, and country at the top level of JSON documents without wrapper
+SELECT
+   JSON_QUERY(this, '$.contactName') AS contactName, JSON_QUERY(this, '$.companyName') AS companyName, JSON_QUERY(this, '$.country') AS country
+FROM customers_json;
+```
+
+#### Order
+
+##### `json-flat`
+
+```sql
+CREATE OR REPLACE MAPPING orders_json (
+    __key VARCHAR,
+    createdOn BIGINT,
+    updatedOn BIGINT,
+    customerId VARCHAR,
+    employeeId VARCHAR,
+    freight DOUBLE,
+    orderDate VARCHAR,
+    orderId VARCHAR,
+    requiredDate BIGINT,
+    shipAddress VARCHAR,
+    shipCity VARCHAR,
+    shipCountry VARCHAR,
+    shipName VARCHAR,
+    shipPostalCode VARCHAR,
+    shipRegion VARCHAR,
+    shipVia VARCHAR,
+    shippedDate BIGINT)
+type IMap OPTIONS('keyFormat'='varchar', 'valueFormat'='json-flat');
+```
+
+Examples:
+
+```sql
+--- Returns key/value pairs of orders that have the freight cost less than or equal to 70.
+--- Note that customerId and freight are paired.
+SELECT JSON_OBJECTAGG(customerId:freight) AS freight, JSON_OBJECTAGG(shipName:shipName) AS shipName
+FROM orders_json
+WHERE freight <= 70;
+```
+
+```sql
+--- Returns the similar results as the previous query. Note that unlike JSON_OBJECTAGG, you can
+--- list pairs in JSON_OBJECT.
+SELECT JSON_OBJECT(customerId:freight, 'shipName':shipName) AS "Customer Frieght"
+from orders_json
+WHERE freight <= 70;
+```
+
+##### `json`
 
 ```sql
 CREATE OR REPLACE MAPPING orders_json
@@ -214,11 +374,25 @@ OPTIONS (
 )
 ```
 
+Examples:
+
+```sql
+--- Returns order JSON documents starting from the JSON root level, i.e., '$'.
+SELECT JSON_QUERY(this, '$')  from orders_json;
+```
+
+```sql
+--- Returns customerId and shipCountry at the top level of JSON documents.
+SELECT JSON_QUERY(this, '$.customerId' WITHOUT WRAPPER) AS customerId, JSON_QUERY(this, '$.shipCountry' WITHOUT WRAPPER) AS shipCountry
+FROM orders_json;
+```
+
 ## References
 
 1. Hazelcast Python Client, <https://hazelcast.readthedocs.io>
-2. Panel, GUI framework, <https://panel.pyviz.org>
-3. Faker, Mock data generator, <https://faker.readthedocs.io>
+2. *GUI framework*, Panel <https://panel.pyviz.org>
+3. *Mock data generator*, Faker <https://faker.readthedocs.io>
+4. *Working with JSON Data in SQL*, Hazelcast, <https://docs.hazelcast.com/hazelcast/latest/sql/working-with-json>
 
 ---
 
