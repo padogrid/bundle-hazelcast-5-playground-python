@@ -40,6 +40,8 @@ apps
 pip install hazelcast-python-client panel pandas Faker cryptography 
 ```
 
+The [`requirements.txt`](apps/playground/requirements.txt) file lists the package versions used in the author's Python environment for running Playground.
+
 3. Create Hazelcast cluster
 
 Create a Hazelcast cluster if you do not have one already.
