@@ -62,8 +62,8 @@ class DacDataStructureIngestor(DacBase, Viewer):
             operation_list = ['add']
             self.default_operation = 'add'
         elif self.ds_type == 'Set':
-            operation_list = ['offer']
-            self.default_operation = 'offer'
+            operation_list = ['add']
+            self.default_operation = 'add'
         elif self.ds_type == 'Topic':
             operation_list = ['publish']
             self.default_operation = 'publish'
