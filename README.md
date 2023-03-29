@@ -284,7 +284,7 @@ cd_app playground/bin_sh
 1. Faker, *A Python package for generating fake data*, <https://faker.readthedocs.io/en/master/>
 1. Hazelcast Python Client Documentation, <https://hazelcast.readthedocs.io/en/stable/>
 1. Miniconda, *A free minimal installer for conda*, <https://docs.conda.io/en/latest/miniconda.html>
-1. pandas, *A fast, powerful, flexible and easy to use open source data analysis and manipulation tool, <https://pandas.pydata.org/>
+1. pandas, *A fast, powerful, flexible and easy to use open source data analysis and manipulation tool*, <https://pandas.pydata.org/>
 1. Panel, *A high-level app and dashboarding solution for Python*, <https://panel.holoviz.org/>
 1. Python, *Downloads*, <https://www.python.org/downloads/>
 
