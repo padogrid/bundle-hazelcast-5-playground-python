@@ -105,6 +105,7 @@ class DacRingbuffer(DacBase, Viewer):
 
         old_name_list = self._ringbuffer_select.options
         if ds_name_list == old_name_list:
+            self.__refresh_size__()
             return
 
         self._ringbuffer_select.options = ds_name_list
@@ -166,7 +167,7 @@ class DacRingbuffer(DacBase, Viewer):
             self._on_click_callback(obj, exception=None)
 
     def __refresh_size__(self):
-        ds_name = self._map_select.value
+        ds_name = self._ringbuffer_select.value
         if ds_name == None:
             self._ds_size_text.value = ''
         else:
@@ -177,7 +178,6 @@ class DacRingbuffer(DacBase, Viewer):
                 self._ds_size_text.value = str('N/A')
             else:
                 self._ds_size_text.value = str(ds_size)
-                self._index_input.end = ds_size-1
 
     def __update_component__(self, obj = None):
         self.__clear_status__()
