@@ -87,7 +87,7 @@ cd_app playground/bin_sh
 cat etc/playground.yaml
 ```
 
-:pencil2: If Playground fails to start, then it is likely that `etc/playground.yaml` file is not valid. You may need to correct the problems or just remove/rename the file and restart Playground.
+:pencil2: If Playground fails to start, then it is likely that the `etc/playground.yaml` file is not valid. You may need to correct the problems or just remove/rename the file and restart Playground.
 
 Output of `playground.yaml`:
 
