@@ -14,7 +14,7 @@ class DacBase():
 
     button_width = 100
     size_text_width = 100
-    thread_pool = ThreadPool(size=10)
+    thread_pool = ThreadPool(size=30)
 
     config = None
     obj_creation_function_dict = None
