@@ -162,9 +162,17 @@ class DacMapIngestor(DacBase, Viewer):
                 operation_list.append(self.default_operation)
                 key_list.append(self.default_key)
                 key_range_list.append(self.default_key_range)
-                object_type_in_ds = self.get_object_name_in_ds(ds)
+
+                # Exception may raise if the map contains Python unsupported
+                # data objects. Ignore for now.
+                try:
+                    object_type_in_ds = self.get_object_name_in_ds(ds)
+                except Exception as ex:
+                    self._status_text.value = f'ERROR: {repr(ex)}'
+                    object_type_in_ds = None
                 if object_type_in_ds == None:
                     object_type_in_ds = self.default_object
+
                 object_list.append(object_type_in_ds)
                 er_list.append(self.default_er)
                 ingest_list.append(False)
@@ -340,8 +348,14 @@ class DacMapIngestor(DacBase, Viewer):
                         key_range = 100_000_000
                     
                     # Get a single object to check whether the selected object type
-                    # is same as the object in the data structure
-                    object_type_in_ds = self.get_object_name_in_ds(map)
+                    # is same as the object in the data structure.
+                    # Exception may raise if the map contains Python unsupported
+                    # data objects. Ignore for now.
+                    try:
+                        object_type_in_ds = self.get_object_name_in_ds(map)
+                    except Exception as ex:
+                        object_type_in_ds = None
+                        self._status_text.value = f'ERROR: {repr(ex)}'
                     
                     object_type = self._df.iloc[event.row]['Object']
                     if object_type_in_ds != None and object_type != object_type_in_ds:
