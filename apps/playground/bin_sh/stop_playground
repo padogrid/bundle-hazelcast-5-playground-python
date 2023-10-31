@@ -42,7 +42,7 @@ EOF
    exit
 fi
 
-pids=$(ps -ewwweo pid,args | grep -i HazelcastPlayground | grep -v grep | awk '{print $1}')
+pids=$(ps -ewwweo pid,args | grep -i HazelcastPlayground | grep "\-\-port" | grep -v grep | awk '{print $1}')
 pids=$(echo $pids)
 
 if [ "$pids" == "" ]; then

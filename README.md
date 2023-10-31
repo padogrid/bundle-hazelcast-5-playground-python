@@ -39,11 +39,20 @@ apps
 
 2. Install the required Python packages
 
+The `requirements.txt` file contains the package versions used in the author's Python environment for running Playground. To avoid package version issues, installing this file is recommended.
+
+```bash
+cd_app playground
+pip install -r requirements.txt
+```
+
+Alternatively, you can also try installing the core packages instead. Depending on your Python environment, however, this may or may not work.
+
 ```bash
 pip install hazelcast-python-client panel pandas Faker cryptography 
 ```
 
-The [`requirements.txt`](apps/playground/requirements.txt) file lists the package versions used in the author's Python environment for running Playground.
+✏️  *You may need to restart the Hazelcast cluster if you reinstalled Python packages.*
 
 3. Create Hazelcast cluster
 
