@@ -39,7 +39,7 @@ apps
 
 2. Install the required Python packages
 
-The `requirements.txt` file contains the package versions used in the author's Python environment for running Playground. To avoid package version issues, installing this file is recommended.
+The `requirements.txt` file contains the package versions used in a test environment. We recommend installing this file to avoid package version conflict issues.
 
 ```bash
 cd_app playground

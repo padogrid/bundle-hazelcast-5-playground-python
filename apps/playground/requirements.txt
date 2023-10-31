@@ -24,7 +24,7 @@ executing==1.2.0
 Faker==17.3.0
 fastjsonschema==2.16.3
 fqdn==1.5.1
-hazelcast-python-client==5.1
+hazelcast-python-client==5.3.0
 idna==3.4
 ipykernel==6.21.2
 ipython==8.10.0
