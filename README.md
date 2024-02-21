@@ -59,7 +59,7 @@ pip install hazelcast-python-client panel pandas Faker cryptography
 Create a Hazelcast cluster if you do not have one already.
 
 ```bash
-make_cluster -product hazelcast -cluster myhz
+create_cluster -product hazelcast -cluster myhz
 ```
 
 
